@@ -1,15 +1,8 @@
 # Konu Karnesi — Vercel Kurulumu
-
-## 1) Önce yaptığın anahtarı iptal et
-`AQ....TQWQ` ile biten anahtarı Google AI Studio'da (API Keys sayfasında) sildiğinden emin ol,
-sonra yeni bir tane oluştur ("Create API key"). Eski anahtarı asla kullanma — o artık
-"ifşa olmuş" sayılır (bir sohbette paylaşıldığı için).
-
-## 2) Bu klasörü deploy et
+ Bu klasörü deploy et
 - Vercel CLI ile: bu klasörde `vercel` komutunu çalıştır (ilk seferinde hesabına bağlanmanı ister)
 - veya: bu klasörü bir GitHub reposuna push edip Vercel dashboard'dan "Import Project" ile bağla
-
-## 3) API anahtarını Vercel'e ekle (koda YAZMA)
+ API anahtarını Vercel'e ekle (koda YAZMA)
 Vercel Dashboard → projen → **Settings → Environment Variables**
 - Key: `GEMINI_API_KEY`
 - Value: (yeni oluşturduğun Gemini anahtarı)
