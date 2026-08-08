@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   try {
     const { system, text, mime, base64 } = req.body || {};
     if (!base64 || !mime) {
-      return res.status(400).json({ error: 'Görsel verisi (base64 veya mime) eksik.' });
+      return res.status(400).json({ error: 'Görsel verisi eksik.' });
     }
 
     const geminiRes = await fetch(
@@ -20,7 +20,11 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: system || '' }] },
+          system_instruction: { 
+            parts: [{ 
+              text: (system || '') + " Lütfen cevabını markdown blokları (```json ... ```) kullanmadan, SADECE saf bir JSON dizisi olarak ver. Örnek format: [{\"no\":1,\"konu\":\"...\"}]" 
+            }] 
+          },
           contents: [{
             role: 'user',
             parts: [
