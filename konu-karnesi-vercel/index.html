@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konu Karnesi — Deneme Takip Sistemi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f7f7f4;
+    --grid:#dfe3ea;
+    --ink:#1e2a4a;
+    --ink-soft:#4a5578;
+    --line:#c7cdda;
+    --dogru:#1f9d63;
+    --dogru-bg:#e2f5ea;
+    --yanlis:#e2483f;
+    --yanlis-bg:#fce6e4;
+    --bos:#8b93a8;
+    --bos-bg:#eceef3;
+    --accent:#2c3e8c;
+    --accent-soft:#eef0fb;
+    --card:#ffffff;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(30,42,74,.06), 0 8px 24px rgba(30,42,74,.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/28px 28px,
+      var(--paper);
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;}
+  .app{max-width:1000px;margin:0 auto;padding:20px 16px 90px;}
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 4px 22px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:9px;background:var(--accent);
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    font-family:'Space Grotesk';font-weight:700;font-size:15px;flex-shrink:0;
+  }
+  .brand h1{font-size:19px;letter-spacing:-.02em;}
+  .brand span{display:block;font-size:12px;color:var(--ink-soft);font-weight:500;margin-top:1px;}
+
+  nav.tabs{
+    display:flex;gap:6px;overflow-x:auto;padding:4px;margin-bottom:22px;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    box-shadow:var(--shadow);
+  }
+  nav.tabs button{
+    flex:1;white-space:nowrap;border:none;background:transparent;
+    padding:10px 12px;font-family:'Inter';font-weight:600;font-size:13px;
+    color:var(--ink-soft);border-radius:9px;cursor:pointer;transition:.15s;
+  }
+  nav.tabs button.active{background:var(--accent);color:#fff;}
+  nav.tabs button:not(.active):hover{background:var(--accent-soft);color:var(--accent);}
+
+  .view{display:none;animation:fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);margin-bottom:16px;
+  }
+  .card h2{font-size:16px;margin-bottom:14px;letter-spacing:-.01em;}
+  .card h2 .eyebrow{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--accent);font-weight:700;margin-bottom:4px;font-family:'JetBrains Mono';}
+
+  .empty{
+    text-align:center;padding:34px 16px;color:var(--ink-soft);
+  }
+  .empty b{color:var(--ink);}
+
+  label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin:0 0 5px;}
+  input[type=text],input[type=date],input[type=number],select,textarea{
+    width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:9px;
+    font-family:'Inter';font-size:14px;background:#fff;color:var(--ink);
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .row > div{flex:1;min-width:140px;}
+
+  button.btn{
+    font-family:'Inter';font-weight:600;font-size:13.5px;border:none;border-radius:9px;
+    padding:11px 18px;cursor:pointer;transition:.15s;
+  }
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#233370;}
+  .btn-ghost{background:var(--accent-soft);color:var(--accent);}
+  .btn-ghost:hover{background:#e1e4f8;}
+  .btn-danger{background:var(--yanlis-bg);color:var(--yanlis);}
+  .btn-danger:hover{background:#f9d5d2;}
+  .btn-sm{padding:6px 11px;font-size:12px;}
+  button:disabled{opacity:.5;cursor:not-allowed;}
+
+  .ledger{border:1px solid var(--line);border-radius:11px;overflow:hidden;}
+  .ledger-row{
+    display:grid;grid-template-columns:1fr 74px 74px 74px 70px;gap:8px;align-items:center;
+    padding:10px 12px;border-bottom:1px solid var(--grid);background:#fff;
+  }
+  .ledger-row:last-child{border-bottom:none;}
+  .ledger-row.head{background:var(--accent-soft);font-size:11px;font-weight:700;
+    color:var(--accent);text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;}
+  .topic-name{font-size:13.5px;font-weight:600;}
+  .pill-input{
+    width:100%;text-align:center;border-radius:7px;border:1.5px solid transparent;
+    padding:7px 4px;font-family:'JetBrains Mono';font-weight:600;font-size:13.5px;
+  }
+  .pill-input.d{background:var(--dogru-bg);color:var(--dogru);}
+  .pill-input.y{background:var(--yanlis-bg);color:var(--yanlis);}
+  .pill-input.b{background:var(--bos-bg);color:var(--bos);}
+  .net-cell{font-family:'JetBrains Mono';font-weight:700;font-size:13.5px;text-align:center;}
+
+  .subject-chip{
+    display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;
+    font-size:12px;font-weight:700;background:var(--accent-soft);color:var(--accent);
+  }
+
+  .exam-card{cursor:default;}
+  .exam-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .exam-meta{font-size:12px;color:var(--ink-soft);margin-top:3px;}
+  .stat-strip{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .stat{background:var(--paper);border:1px solid var(--grid);border-radius:9px;padding:8px 12px;min-width:76px;text-align:center;}
+  .stat b{display:block;font-family:'JetBrains Mono';font-size:16px;}
+  .stat span{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
+
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .bar-label{width:150px;font-size:12.5px;font-weight:600;flex-shrink:0;text-align:right;}
+  .bar-track{flex:1;height:18px;background:var(--grid);border-radius:6px;overflow:hidden;display:flex;}
+  .bar-seg.d{background:var(--dogru);}
+  .bar-seg.y{background:var(--yanlis);}
+  .bar-seg.b{background:var(--bos);}
+  .bar-pct{width:44px;font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;color:var(--ink-soft);}
+
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--ink-soft);margin-bottom:16px;flex-wrap:wrap;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .dot.d{background:var(--dogru);}.dot.y{background:var(--yanlis);}.dot.b{background:var(--bos);}
+
+  .photo-drop{
+    border:2px dashed var(--line);border-radius:12px;padding:26px 16px;text-align:center;
+    cursor:pointer;transition:.15s;background:var(--paper);
+  }
+  .photo-drop:hover{border-color:var(--accent);background:var(--accent-soft);}
+  .photo-drop svg{margin-bottom:8px;}
+  .photo-preview{max-width:100%;border-radius:10px;border:1px solid var(--line);margin-top:12px;}
+
+  .qmap-row{display:grid;grid-template-columns:44px 1fr 130px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--grid);}
+  .qmap-row:last-child{border-bottom:none;}
+  .qno{font-family:'JetBrains Mono';font-weight:700;font-size:12.5px;color:var(--ink-soft);text-align:center;}
+  .seg{display:flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;}
+  .seg button{flex:1;border:none;background:#fff;padding:6px 0;font-size:11px;font-weight:700;font-family:'JetBrains Mono';cursor:pointer;color:var(--ink-soft);}
+  .seg button.on.d{background:var(--dogru);color:#fff;}
+  .seg button.on.y{background:var(--yanlis);color:#fff;}
+  .seg button.on.b{background:var(--bos);color:#fff;}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(30px);
+    background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;
+    opacity:0;transition:.25s;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.2);pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .topic-edit-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .topic-edit-row input{flex:1;}
+  .icon-x{background:none;border:none;color:var(--yanlis);cursor:pointer;font-size:16px;padding:4px 8px;font-weight:700;}
+
+  .spin{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;
+    animation:sp .7s linear infinite;display:inline-block;vertical-align:-3px;margin-right:7px;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+
+  .muted-note{font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.5;}
+  .flex-between{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+
+  .login-screen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .login-card{
+    width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);
+    border-radius:20px;box-shadow:0 2px 6px rgba(30,42,74,.06), 0 16px 40px rgba(30,42,74,.10);
+    padding:34px 28px;
+  }
+  .login-tabs{display:flex;gap:6px;background:var(--paper);border:1px solid var(--line);
+    border-radius:12px;padding:5px;margin-bottom:22px;}
+  .login-tab{flex:1;border:none;background:transparent;padding:10px 0;border-radius:9px;
+    font-family:'Inter';font-weight:600;font-size:13px;color:var(--ink-soft);cursor:pointer;transition:.15s;}
+  .login-tab.active{background:var(--accent);color:#fff;box-shadow:0 3px 8px rgba(44,62,140,.25);}
+  .login-switch{text-align:center;font-size:12.5px;color:var(--ink-soft);margin-top:14px;}
+  .login-switch a{color:var(--accent);font-weight:600;text-decoration:none;}
+  .login-switch a:hover{text-decoration:underline;}
+  .login-error{text-align:center;font-size:12.5px;color:var(--yanlis);margin-top:10px;min-height:1em;}
+  .input-icon{position:relative;margin-top:7px;}
+  .input-icon .icon-left{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--ink-soft);pointer-events:none;transition:.15s;z-index:2;}
+  .login-card input[type=email],
+  .login-card input[type=password],
+  .login-card input[type=text]{
+    width:100%;height:52px;padding:0 46px 0 46px;border-radius:13px;
+    border:1.5px solid var(--line);background:var(--paper);
+    font-family:'Inter';font-size:14.5px;color:var(--ink);
+    transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  .login-card input[type=email]{padding-right:16px;}
+  .login-card input[type=email]:hover,
+  .login-card input[type=password]:hover{border-color:#a9b2c9;}
+  .login-card input[type=email]:focus,
+  .login-card input[type=password]:focus{
+    background:#fff;border-color:var(--accent);
+    box-shadow:0 0 0 4px rgba(44,62,140,.13);outline:none;
+  }
+  .login-card input:focus + .icon-left,
+  .input-icon:focus-within .icon-left{color:var(--accent);}
+  .login-card label{font-size:12.5px;margin-bottom:6px;}
+  .login-card .btn-primary{height:52px;border-radius:13px;font-size:14.5px;letter-spacing:.01em;}
+  .login-card .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(44,62,140,.25);}
+  .pw-toggle{
+    position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    background:none;border:none;cursor:pointer;padding:8px;color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;border-radius:7px;z-index:2;
+  }
+  .pw-toggle:hover{color:var(--accent);background:var(--accent-soft);}
+  .pw-toggle.showing .eye-icon{color:var(--accent);}
+
+  @media (max-width:520px){
+    .ledger-row{grid-template-columns:1fr 56px 56px 56px 52px;gap:5px;padding:8px 8px;}
+    .pill-input{font-size:12px;padding:6px 2px;}
+    .bar-label{width:104px;font-size:11px;}
+    .topic-name{font-size:12.5px;}
+    .insight-grid{grid-template-columns:1fr !important;}
+  }
+</style>
+</head>
+<body>
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="brand" style="justify-content:center;margin-bottom:22px;">
+      <div class="brand-mark">KK</div>
+      <div>
+        <h1>Konu Karnesi</h1>
+        <span>Deneme sınavı konu takip sistemi</span>
+      </div>
+    </div>
+
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-login">Giriş Yap</button>
+      <button class="login-tab" id="tab-register">Kayıt Ol</button>
+    </div>
+
+    <div id="login-form">
+      <label>E-posta adresi</label>
+      <div class="input-icon">
+        <svg class="icon-left" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/><path d="m3.5 6 8.5 7 8.5-7"/></svg>
+        <input type="email" id="login-email" placeholder="ornek@mail.com" autocomplete="email">
+      </div>
+      <label style="margin-top:12px;">Şifre</label>
+      <div class="input-icon">
+        <svg class="icon-left" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+        <input type="password" id="login-password" placeholder="şifren" autocomplete="current-password">
+        <button type="button" class="pw-toggle" data-target="login-password" aria-label="Şifreyi göster/gizle">
+          <svg class="eye-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <button class="btn btn-primary" id="login-submit" style="width:100%;margin-top:18px;">Giriş Yap</button>
+      <p class="login-switch">Hesabın yok mu? <a href="#" id="go-register">Kayıt ol</a></p>
+    </div>
+
+    <div id="register-form" style="display:none;">
+      <label>E-posta adresi</label>
+      <div class="input-icon">
+        <svg class="icon-left" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/><path d="m3.5 6 8.5 7 8.5-7"/></svg>
+        <input type="email" id="register-email" placeholder="ornek@mail.com" autocomplete="email">
+      </div>
+      <label style="margin-top:12px;">Şifre</label>
+      <div class="input-icon">
+        <svg class="icon-left" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+        <input type="password" id="register-password" placeholder="en az 6 karakter" autocomplete="new-password">
+        <button type="button" class="pw-toggle" data-target="register-password" aria-label="Şifreyi göster/gizle">
+          <svg class="eye-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <label style="margin-top:12px;">Şifre (tekrar)</label>
+      <div class="input-icon">
+        <svg class="icon-left" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+        <input type="password" id="register-password2" placeholder="şifreyi tekrar yaz" autocomplete="new-password">
+        <button type="button" class="pw-toggle" data-target="register-password2" aria-label="Şifreyi göster/gizle">
+          <svg class="eye-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <button class="btn btn-primary" id="register-submit" style="width:100%;margin-top:18px;">Kayıt Ol</button>
+      <p class="login-switch">Zaten hesabın var mı? <a href="#" id="go-login">Giriş yap</a></p>
+    </div>
+
+    <p class="login-error" id="login-error"></p>
+  </div>
+</div>
+
+<div class="app" id="app-root" style="display:none;">
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark">KK</div>
+      <div>
+        <h1>Konu Karnesi</h1>
+        <span>Deneme sınavı konu takip sistemi</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button data-view="ozet" class="active">Özet</button>
+    <button data-view="ekle">Yeni Deneme</button>
+    <button data-view="foto">Fotoğraf ile Analiz</button>
+    <button data-view="gecmis">Geçmiş</button>
+    <button data-view="konular">Konular</button>
+    <button data-view="hesap">Hesap</button>
+  </nav>
+
+  <!-- ÖZET -->
+  <div class="view active" id="view-ozet">
+    <div id="ozet-content"></div>
+  </div>
+
+  <!-- YENİ DENEME -->
+  <div class="view" id="view-ekle">
+    <div class="card">
+      <h2><span class="eyebrow">Adım 1</span>Deneme bilgileri</h2>
+      <div class="row">
+        <div>
+          <label>Ders</label>
+          <select id="ekle-subject"></select>
+        </div>
+        <div>
+          <label>Deneme adı</label>
+          <input type="text" id="ekle-name" placeholder="Örn. 7. Yediiklim Denemesi">
+        </div>
+        <div>
+          <label>Tarih</label>
+          <input type="date" id="ekle-date">
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="eyebrow">Adım 2</span>Konu bazlı doğru / yanlış / boş gir</h2>
+      <div class="legend">
+        <span><i class="dot d"></i>Doğru</span>
+        <span><i class="dot y"></i>Yanlış</span>
+        <span><i class="dot b"></i>Boş</span>
+      </div>
+      <div class="ledger" id="ekle-ledger"></div>
+      <div class="stat-strip" id="ekle-totals" style="margin-top:16px;"></div>
+      <div style="margin-top:18px;">
+        <button class="btn btn-primary" id="ekle-save">Denemeyi kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOTOĞRAF ANALİZİ -->
+  <div class="view" id="view-foto">
+    <div class="card">
+      <h2><span class="eyebrow">Yapay zeka</span>Fotoğraftan konu tespiti</h2>
+      <p class="muted-note" style="margin-top:-6px;margin-bottom:14px;">
+        Sınav kağıdındaki soruların fotoğrafını yükle. Yapay zeka her soru numarasını, seçtiğin dersin konu listesiyle eşleştirir.
+        Ardından her soruyu doğru / yanlış / boş olarak işaretleyip tek tıkla o denemeye ekleyebilirsin.
+      </p>
+      <div class="row" id="gemini-key-row">
+        <div>
+          <label>Gemini API anahtarı</label>
+          <input type="password" id="gemini-key" placeholder="AQ..." autocomplete="off">
+          <p class="muted-note">Bu uygulama Vercel'de yayınlandıysa anahtar sunucuda güvenle saklanır, bu alanı boş bırakabilirsin.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Hangi ders?</label>
+          <select id="foto-subject"></select>
+        </div>
+      </div>
+      <div class="photo-buttons" style="display:flex;gap:10px;margin-bottom:12px;">
+        <button class="btn btn-primary" id="foto-camera-btn" style="flex:1;">📷 Kamerayla çek</button>
+        <button class="btn btn-ghost" id="foto-gallery-btn" style="flex:1;">🖼 Galeriden seç</button>
+      </div>
+      <div class="photo-drop" id="foto-drop">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2c3e8c" stroke-width="1.6"><path d="M4 16V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10M4 16l4-4 3 3 5-6 4 5M4 16h16"/></svg>
+        <div style="font-weight:600;font-size:13.5px;">veya buraya fotoğraf sürükle</div>
+        <div class="muted-note">JPG / PNG</div>
+      </div>
+      <input type="file" id="foto-input-camera" accept="image/*" capture="environment" style="display:none;">
+      <input type="file" id="foto-input-gallery" accept="image/*" style="display:none;">
+      <img id="foto-preview" class="photo-preview" style="display:none;">
+      <div style="margin-top:14px;">
+        <button class="btn btn-primary" id="foto-analyze" disabled>Konuları tespit et</button>
+      </div>
+      <div id="foto-status" class="muted-note"></div>
+    </div>
+
+    <div class="card" id="foto-results" style="display:none;">
+      <h2><span class="eyebrow">Sonuç</span>Soru → konu eşleşmesi</h2>
+      <p class="muted-note" style="margin-top:-6px;margin-bottom:10px;">Konu yanlışsa açılır menüden düzelt, sonra her soru için D / Y / B işaretle.</p>
+      <div id="foto-qmap"></div>
+      <div class="row" style="margin-top:16px;">
+        <div>
+          <label>Deneme adı</label>
+          <input type="text" id="foto-examname" placeholder="Örn. Kurumsal Deneme 3">
+        </div>
+        <div>
+          <label>Tarih</label>
+          <input type="date" id="foto-examdate">
+        </div>
+      </div>
+      <button class="btn btn-primary" id="foto-save">Bu denemeyi kaydet</button>
+    </div>
+  </div>
+
+  <!-- GEÇMİŞ -->
+  <div class="view" id="view-gecmis">
+    <div id="gecmis-content"></div>
+  </div>
+
+  <!-- KONULAR -->
+  <div class="view" id="view-konular">
+    <div class="card">
+      <h2><span class="eyebrow">Ayarlar</span>Ders ve konu yönetimi</h2>
+      <div id="konular-subjects"></div>
+      <div style="margin-top:16px;display:flex;gap:8px;">
+        <input type="text" id="yeni-subject-name" placeholder="Yeni ders adı (örn. Matematik)">
+        <button class="btn btn-ghost" id="yeni-subject-btn">Ders ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HESAP / SENKRONİZASYON -->
+  <div class="view" id="view-hesap">
+    <div class="card">
+      <h2><span class="eyebrow">Cihazlar arası senkronizasyon</span>Hesap</h2>
+      <p class="muted-note" style="margin-top:-6px;margin-bottom:14px;">
+        Bir e-posta ve şifre belirle. Hangi cihazdan / hangi link üzerinden girersen gir, aynı e-posta + şifre ile bağlandığında aynı verileri görürsün.
+      </p>
+      <div class="row">
+        <div>
+          <label>E-posta adresi</label>
+          <input type="email" id="acc-email" placeholder="ornek@mail.com">
+        </div>
+        <div>
+          <label>Şifre</label>
+          <input type="password" id="acc-password" placeholder="en az 6 karakter" autocomplete="off">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="acc-connect">Bağlan / Senkronize et</button>
+        <button class="btn btn-ghost" id="acc-sync-now" style="display:none;">Şimdi senkronize et</button>
+        <button class="btn btn-danger" id="acc-disconnect" style="display:none;">Çıkış Yap</button>
+      </div>
+      <p class="muted-note" id="acc-status" style="margin-top:12px;"></p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GEMINI_API_KEY = "";
+
+const DEFAULT_DATA = {
+  subjects: [
+    {
+      id: 'cografya', name: 'Coğrafya',
+      topics: [
+        'Coğrafi Konum','İklim ve Bitki Örtüsü','Fiziki Özellikler (Dağ, Ova, Plato, Toprak)',
+        'Nüfus ve Yerleşme','Tarım','Hayvancılık','Maden dan Enerji Kaynakları','Sanayi',
+        'Ulaşım','Ticaret','Turizm','Bölgeler','Beşeri Sistemler','Ekonomik Sistemler'
+      ]
+    },
+    {
+      id: 'tarih', name: 'Tarih',
+      topics: [
+        'İslamiyet Öncesi Türk Tarihi','İlk Türk-İslam Devletleri','Anadolu Selçuklu Devleti ve Beylikler',
+        'Osmanlı Kültür ve Medeniyeti','Kuruluş Dönemi','Yükselme Dönemi','17. Yüzyıl (Duraklama)',
+        '18. Yüzyıl (Gerileme)','19. Yüzyıl (Dağılma)','20. Yüzyıl','Kurtuluş Savaşı Hazırlık Dönemi',
+        'I. TBMM ve Ayaklanmalar','Kurtuluş Savaşı Muharebeleri ve Antlaşmalar','Cumhuriyet Dönemi Kültür',
+        'Atatürk İlkeleri, İnkılapları ve Dış Politika','Çağdaş Türk ve Dünya Tarihi'
+      ]
+    },
+    {
+      id: 'matematik', name: 'Matematik',
+      topics: [
+        'Temel Kavramlar','Sayı Basamakları','Bölme ve Bölünebilme','OBEB - OKEK','Rasyonel Sayılar',
+        'Basit Eşitsizlikler','Mutlak Değer','Üslü Sayılar','Köklü Sayılar','Çarpanlara Ayırma',
+        'Oran Orantı','Denklem Çözme','Problemler (Sayı, Kesir, Yaş, Yüzde, Kar-Zarar, Karışım, Hareket, İşçi)',
+        'Kümeler','Fonksiyonlar','Polinomlar','II. Dereceden Denklemler','Permütasyon ve Kombinasyon',
+        'Olasılık','İstatistik','Geometri (Üçgenler, Çokgenler)','Geometri (Çember ve Daire)',
+        'Geometri (Katı Cisimler)','Analitik Geometri'
+      ]
+    }
+  ],
+  exams: []
+};
+
+let DATA = null;
+let fotoQMap = []; 
+let fotoMarks = {}; 
+let fotoBase64 = null;
+let fotoMime = 'image/jpeg';
+
+async function sha256Hex(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function getAccount(){
+  const raw = await Store.get('konu-karnesi-account');
+  return raw ? JSON.parse(raw) : null;
+}
+async function setAccount(cfg){
+  if(cfg) await Store.set('konu-karnesi-account', JSON.stringify(cfg));
+}
+async function clearAccount(){
+  await Store.set('konu-karnesi-account', '');
+}
+async function cloudGet(key){
+  const res = await fetch('/api/data', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'get', key })
+  });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || `Sunucu hatası (${res.status})`);
+  return data.value;
+}
+async function cloudSet(key, value){
+  const res = await fetch('/api/data', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'set', key, value })
+  });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || `Sunucu hatası (${res.status})`);
+  return data;
+}
+function setAccStatus(msg){
+  const el = document.getElementById('acc-status');
+  if(el) el.textContent = msg;
+}
+
+function renderHesap(){
+  getAccount().then(acc=>{
+    const connectBtn = document.getElementById('acc-connect');
+    const syncBtn = document.getElementById('acc-sync-now');
+    const disconnectBtn = document.getElementById('acc-disconnect');
+    if(acc){
+      document.getElementById('acc-email').value = acc.email;
+      connectBtn.textContent = 'Yeniden bağlan';
+      syncBtn.style.display = '';
+      disconnectBtn.style.display = '';
+      setAccStatus(`Bağlı: ${acc.email}`);
+    }else{
+      syncBtn.style.display = 'none';
+      disconnectBtn.style.display = 'none';
+      setAccStatus('Henüz bir hesaba bağlı değilsin — veriler sadece bu cihazda saklanıyor.');
+    }
+  });
+}
+
+document.getElementById('acc-connect').addEventListener('click', async ()=>{
+  const email = document.getElementById('acc-email').value.trim();
+  const password = document.getElementById('acc-password').value;
+  if(!isValidEmail(email) || password.length<6){
+    setAccStatus('Geçerli bir e-posta gir ve en az 6 karakterli bir şifre belirle.');
+    return;
+  }
+  const key = await sha256Hex(email.toLowerCase()+'::'+password);
+  setAccStatus('Bağlanılıyor...');
+  try{
+    const cloudVal = await cloudGet(key);
+    if(cloudVal){
+      DATA = JSON.parse(cloudVal);
+      await Store.set('konu-karnesi-data', cloudVal);
+      setAccStatus(`Bağlandı. Buluttaki verilerin bu cihaza yüklendi (${email}).`);
+    }else{
+      await cloudSet(key, JSON.stringify(DATA));
+      setAccStatus(`Bağlandı. Bu cihazdaki veriler buluta yüklendi (${email}).`);
+    }
+    await setAccount({ email, key });
+    document.getElementById('acc-password').value = '';
+    renderHesap();
+    renderOzet();
+  }catch(e){
+    setAccStatus('Bağlantı başarısız: ' + (e.message || 'bilinmeyen hata'));
+  }
+});
+
+document.getElementById('acc-sync-now').addEventListener('click', async ()=>{
+  const acc = await getAccount();
+  if(!acc) return;
+  setAccStatus('Senkronize ediliyor...');
+  try{
+    await cloudSet(acc.key, JSON.stringify(DATA));
+    setAccStatus(`Senkronize edildi · ${new Date().toLocaleTimeString('tr-TR')}`);
+  }catch(e){
+    setAccStatus('Senkronizasyon başarısız: ' + (e.message || 'bilinmeyen hata'));
+  }
+});
+
+document.getElementById('acc-disconnect').addEventListener('click', async ()=>{
+  if(!confirm('Çıkış yapmak istediğine emin misin?')) return;
+  await clearAccount();
+  location.reload();
+});
+
+function uid(){ return Math.random().toString(36).slice(2,10); }
+
+const Store = {
+  async get(key){
+    try{
+      if(window.storage){ const r = await window.storage.get(key, false); return r ? r.value : null; }
+    }catch(e){}
+    try{ return localStorage.getItem(key); }catch(e){ return null; }
+  },
+  async set(key, value){
+    try{
+      if(window.storage){ await window.storage.set(key, value, false); return true; }
+    }catch(e){}
+    try{ localStorage.setItem(key, value); return true; }catch(e){ return false; }
+  }
+};
+
+async function loadGeminiKey(){
+  const keyField = document.getElementById('gemini-key');
+  const keyRow = document.getElementById('gemini-key-row');
+  if(GEMINI_API_KEY){
+    keyField.value = GEMINI_API_KEY;
+    keyRow.style.display = 'none';
+    return;
+  }
+  keyRow.style.display = '';
+  const v = await Store.get('konu-karnesi-gemini-key');
+  if(v){ keyField.value = v; }
+}
+async function saveGeminiKey(){
+  if(GEMINI_API_KEY) return;
+  const v = document.getElementById('gemini-key').value.trim();
+  await Store.set('konu-karnesi-gemini-key', v);
+}
+function getActiveGeminiKey(){
+  return GEMINI_API_KEY || document.getElementById('gemini-key').value.trim();
+}
+
+async function loadData(){
+  try{
+    const val = await Store.get('konu-karnesi-data');
+    if(val){ DATA = JSON.parse(val); }
+  }catch(e){}
+  if(!DATA){ DATA = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+
+  const acc = await getAccount();
+  if(acc){
+    try{
+      const cloudVal = await cloudGet(acc.key);
+      if(cloudVal){
+        DATA = JSON.parse(cloudVal);
+        await Store.set('konu-karnesi-data', cloudVal);
+      }else{
+        await cloudSet(acc.key, JSON.stringify(DATA));
+      }
+    }catch(e){}
+  }
+  if(!(await Store.get('konu-karnesi-data'))) await saveData();
+}
+async function saveData(){
+  await Store.set('konu-karnesi-data', JSON.stringify(DATA));
+  const acc = await getAccount();
+  if(acc){
+    try{ await cloudSet(acc.key, JSON.stringify(DATA)); }catch(e){}
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function getSubject(id){ return DATA.subjects.find(s=>s.id===id); }
+function net(d,y){ return d - y/4; }
+
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+    if(btn.dataset.view==='ozet') renderOzet();
+    if(btn.dataset.view==='ekle') renderEkle();
+    if(btn.dataset.view==='foto') renderFotoSetup();
+    if(btn.dataset.view==='gecmis') renderGecmis();
+    if(btn.dataset.view==='konular') renderKonular();
+    if(btn.dataset.view==='hesap') renderHesap();
+  });
+});
+
+function renderOzet(){
+  const wrap = document.getElementById('ozet-content');
+  if(DATA.exams.length===0){
+    wrap.innerHTML = `<div class="card"><div class="empty"><b>Henüz deneme eklenmedi.</b></div></div>`;
+    return;
+  }
+  let html = '';
+  DATA.subjects.forEach(subj=>{
+    const exams = DATA.exams.filter(e=>e.subjectId===subj.id).sort((a,b)=>a.date.localeCompare(b.date));
+    if(exams.length===0) return;
+    const agg = {};
+    subj.topics.forEach(t=>agg[t]={d:0,y:0,b:0});
+    exams.forEach(e=>e.entries.forEach(en=>{
+      if(!agg[en.topic]) agg[en.topic]={d:0,y:0,b:0};
+      agg[en.topic].d+=en.d; agg[en.topic].y+=en.y; agg[en.topic].b+=en.b;
+    }));
+    const totalD = exams.reduce((s,e)=>s+e.entries.reduce((a,x)=>a+x.d,0),0);
+    const totalY = exams.reduce((s,e)=>s+e.entries.reduce((a,x)=>a+x.y,0),0);
+    const totalB = exams.reduce((s,e)=>s+e.entries.reduce((a,x)=>a+x.b,0),0);
+
+    html += `<div class="card">
+      <h2><span class="eyebrow">${exams.length} deneme</span>${subj.name}</h2>
+      <div class="stat-strip" style="margin-bottom:18px;">
+        <div class="stat"><b style="color:var(--dogru)">${totalD}</b><span>Doğru</span></div>
+        <div class="stat"><b style="color:var(--yanlis)">${totalY}</b><span>Yanlış</span></div>
+        <div class="stat"><b style="color:var(--bos)">${totalB}</b><span>Boş</span></div>
+        <div class="stat"><b style="color:var(--accent)">${net(totalD,totalY).toFixed(1)}</b><span>Toplam Net</span></div>
+      </div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+function populateSubjectSelect(sel){
+  sel.innerHTML = DATA.subjects.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+function renderEkle(){
+  const sel = document.getElementById('ekle-subject');
+  populateSubjectSelect(sel);
+  document.getElementById('ekle-date').valueAsDate = new Date();
+  buildEkleLedger();
+  sel.onchange = buildEkleLedger;
+}
+function buildEkleLedger(){
+  const subj = getSubject(document.getElementById('ekle-subject').value);
+  const ledger = document.getElementById('ekle-ledger');
+  ledger.innerHTML = `<div class="ledger-row head"><div>Konu</div><div>Doğru</div><div>Yanlış</div><div>Boş</div><div>Net</div></div>` +
+    subj.topics.map((t,i)=>`
+      <div class="ledger-row" data-topic="${t}">
+        <div class="topic-name">${t}</div>
+        <input class="pill-input d" type="number" min="0" value="0" data-k="d">
+        <input class="pill-input y" type="number" min="0" value="0" data-k="y">
+        <input class="pill-input b" type="number" min="0" value="0" data-k="b">
+        <div class="net-cell">0</div>
+      </div>`).join('');
+  ledger.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const row = inp.closest('.ledger-row');
+      const d = +row.querySelector('[data-k=d]').value||0;
+      const y = +row.querySelector('[data-k=y]').value||0;
+      row.querySelector('.net-cell').textContent = net(d,y).toFixed(2);
+      updateEkleTotals();
+    });
+  });
+  updateEkleTotals();
+}
+function updateEkleTotals(){
+  const rows = [...document.querySelectorAll('#ekle-ledger .ledger-row:not(.head)')];
+  let D=0,Y=0,B=0;
+  rows.forEach(r=>{
+    D += +r.querySelector('[data-k=d]').value||0;
+    Y += +r.querySelector('[data-k=y]').value||0;
+    B += +r.querySelector('[data-k=b]').value||0;
+  });
+  document.getElementById('ekle-totals').innerHTML = `
+    <div class="stat"><b style="color:var(--dogru)">${D}</b><span>Doğru</span></div>
+    <div class="stat"><b style="color:var(--yanlis)">${Y}</b><span>Yanlış</span></div>
+    <div class="stat"><b style="color:var(--bos)">${B}</b><span>Boş</span></div>
+    <div class="stat"><b style="color:var(--accent)">${net(D,Y).toFixed(2)}</b><span>Net</span></div>`;
+}
+
+document.getElementById('ekle-save').addEventListener('click', async ()=>{
+  const subjectId = document.getElementById('ekle-subject').value;
+  const name = document.getElementById('ekle-name').value.trim() || 'İsimsiz Deneme';
+  const date = document.getElementById('ekle-date').value || new Date().toISOString().slice(0,10);
+  const rows = [...document.querySelectorAll('#ekle-ledger .ledger-row:not(.head)')];
+  const entries = rows.map(r=>({
+    topic: r.dataset.topic,
+    d: +r.querySelector('[data-k=d]').value||0,
+    y: +r.querySelector('[data-k=y]').value||0,
+    b: +r.querySelector('[data-k=b]').value||0,
+  })).filter(e=>e.d+e.y+e.b>0);
+  if(entries.length===0){ showToast('En az bir konuya veri gir'); return; }
+  DATA.exams.push({ id: uid(), subjectId, name, date, entries });
+  await saveData();
+  showToast('Deneme kaydedildi ✓');
+  document.getElementById('ekle-name').value='';
+  buildEkleLedger();
+});
+
+function renderFotoSetup(){
+  populateSubjectSelect(document.getElementById('foto-subject'));
+  document.getElementById('foto-examdate').valueAsDate = new Date();
+  loadGeminiKey();
+}
+document.getElementById('gemini-key').addEventListener('change', saveGeminiKey);
+
+const fotoDrop = document.getElementById('foto-drop');
+const fotoInputCamera = document.getElementById('foto-input-camera');
+const fotoInputGallery = document.getElementById('foto-input-gallery');
+document.getElementById('foto-camera-btn').addEventListener('click', ()=>fotoInputCamera.click());
+document.getElementById('foto-gallery-btn').addEventListener('click', ()=>fotoInputGallery.click());
+fotoDrop.addEventListener('click', ()=>fotoInputGallery.click());
+fotoInputCamera.addEventListener('change', handleFotoFile);
+fotoInputGallery.addEventListener('change', handleFotoFile);
+
+function handleFotoFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  fotoMime = file.type && file.type.startsWith('image/') ? file.type : 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    fotoBase64 = reader.result.split(',')[1];
+    const preview = document.getElementById('foto-preview');
+    preview.src = reader.result; preview.style.display='block';
+    document.getElementById('foto-analyze').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function callGeminiAPI({system, text, mime, base64}){
+  const apiKey = getActiveGeminiKey();
+  if(!apiKey){
+    throw new Error('Gemini API anahtarı girilmedi.');
+  }
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: system }] },
+        contents: [{
+          role: "user",
+          parts: [
+            { inline_data: { mime_type: mime, data: base64 } },
+            { text: text }
+          ]
+        }],
+        generationConfig: { responseMimeType: "application/json", maxOutputTokens: 2000 }
+      })
+    }
+  );
+  return await response.json();
+}
+
+document.getElementById('foto-analyze').addEventListener('click', async ()=>{
+  const subj = getSubject(document.getElementById('foto-subject').value);
+  const btn = document.getElementById('foto-analyze');
+  const status = document.getElementById('foto-status');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Tespit ediliyor...';
+  try{
+    const topicList = subj.topics.map((t,i)=>`${i+1}. ${t}`).join('\n');
+    const system = `Soru listesi eşleştirme asistanısın. Sadece JSON dizisi döndür: [{"no":1,"konu":"..."}] Konular: ${topicList}`;
+    const data = await callGeminiAPI({ system, text: "Soruları eşleştir.", mime: fotoMime, base64: fotoBase64 });
+    let text = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
+    fotoQMap = JSON.parse(text);
+    fotoMarks = {};
+    fotoQMap.forEach(p=>fotoMarks[p.no]='d');
+    renderFotoResults(subj);
+    status.textContent = '';
+  }catch(err){
+    status.textContent = 'Analiz başarısız: ' + err.message;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Konuları tespit et';
+});
+
+function renderFotoResults(subj){
+  const box = document.getElementById('foto-results');
+  box.style.display = 'block';
+  document.getElementById('foto-qmap').innerHTML = fotoQMap.map(p=>`
+    <div class="qmap-row" data-no="${p.no}">
+      <div class="qno">#${p.no}</div>
+      <select class="qmap-select">${subj.topics.map(t=>`<option value="${t}" ${t===p.konu?'selected':''}>${t}</option>`).join('')}</select>
+      <div class="seg"><button data-v="d" class="on d">D</button><button data-v="y">Y</button><button data-v="b">B</button></div>
+    </div>`).join('');
+  box.scrollIntoView({behavior:'smooth'});
+}
+
+document.getElementById('foto-save').addEventListener('click', async ()=>{
+  const subj = getSubject(document.getElementById('foto-subject').value);
+  const name = document.getElementById('foto-examname').value.trim() || 'Fotoğraf Denemesi';
+  const date = document.getElementById('foto-examdate').value || new Date().toISOString().slice(0,10);
+  const agg = {};
+  fotoQMap.forEach(p=>{
+    const mark = fotoMarks[p.no] || 'd';
+    if(!agg[p.konu]) agg[p.konu] = {d:0,y:0,b:0};
+    agg[p.konu][mark]++;
+  });
+  const entries = Object.entries(agg).map(([topic,v])=>({topic, d:v.d, y:v.y, b:v.b}));
+  DATA.exams.push({ id: uid(), subjectId: subj.id, name, date, entries });
+  await saveData();
+  showToast('Deneme kaydedildi ✓');
+  document.getElementById('foto-results').style.display='none';
+});
+
+function renderGecmis(){
+  const wrap = document.getElementById('gecmis-content');
+  if(DATA.exams.length===0){ wrap.innerHTML = `<div class="card"><div class="empty"><b>Henüz deneme yok.</b></div></div>`; return; }
+  wrap.innerHTML = [...DATA.exams].reverse().map(exam=>{
+    const subj = getSubject(exam.subjectId);
+    const D = exam.entries.reduce((s,e)=>s+e.d,0);
+    const Y = exam.entries.reduce((s,e)=>s+e.y,0);
+    const B = exam.entries.reduce((s,e)=>s+e.b,0);
+    return `<div class="card exam-card"><div class="exam-top"><span class="subject-chip">${subj?subj.name:'?'}</span> <b>${exam.name}</b> <button class="btn btn-danger btn-sm" data-del="${exam.id}">Sil</button></div></div>`;
+  }).join('');
+  wrap.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      DATA.exams = DATA.exams.filter(e=>e.id!==btn.dataset.del);
+      await saveData();
+      renderGecmis();
+    });
+  });
+}
+
+function renderKonular(){
+  document.getElementById('konular-subjects').innerHTML = DATA.subjects.map(subj=>`<h3>${subj.name}</h3>`).join('');
+}
+
+function setLoginError(msg){ document.getElementById('login-error').textContent = msg || ''; }
+function enterApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = '';
+  renderOzet();
+}
+function isValidEmail(str){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str); }
+
+document.querySelectorAll('.pw-toggle').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const target = document.getElementById(btn.dataset.target);
+    const showing = target.type === 'text';
+    target.type = showing ? 'password' : 'text';
+    btn.classList.toggle('showing', !showing);
+  });
+});
+
+document.getElementById('tab-login').addEventListener('click', ()=>{
+  document.getElementById('tab-login').classList.add('active');
+  document.getElementById('tab-register').classList.remove('active');
+  document.getElementById('login-form').style.display = '';
+  document.getElementById('register-form').style.display = 'none';
+  setLoginError('');
+});
+document.getElementById('tab-register').addEventListener('click', ()=>{
+  document.getElementById('tab-register').classList.add('active');
+  document.getElementById('tab-login').classList.remove('active');
+  document.getElementById('register-form').style.display = '';
+  document.getElementById('login-form').style.display = 'none';
+  setLoginError('');
+});
+document.getElementById('go-register').addEventListener('click', (e)=>{ e.preventDefault(); document.getElementById('tab-register').click(); });
+document.getElementById('go-login').addEventListener('click', (e)=>{ e.preventDefault(); document.getElementById('tab-login').click(); });
+
+document.getElementById('login-submit').addEventListener('click', async ()=>{
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if(!isValidEmail(email) || !password){ setLoginError('E-posta ve şifre gir.'); return; }
+  const key = await sha256Hex(email.toLowerCase()+'::'+password);
+  await setAccount({ email, key });
+  enterApp();
+});
+
+document.getElementById('register-submit').addEventListener('click', async ()=>{
+  const email = document.getElementById('register-email').value.trim();
+  const password = document.getElementById('register-password').value;
+  const password2 = document.getElementById('register-password2').value;
+  if(!isValidEmail(email)){ setLoginError('Geçerli e-posta gir.'); return; }
+  if(password.length<6){ setLoginError('Şifre en az 6 karakter olsun.'); return; }
+  if(password !== password2){ setLoginError('Şifreler eşleşmiyor.'); return; }
+  const key = await sha256Hex(email.toLowerCase()+'::'+password);
+  await setAccount({ email, key });
+  enterApp();
+});
+
+(async function init(){
+  await loadData();
+  const acc = await getAccount();
+  if(acc) enterApp();
+})();
+</script>
+</body>
+</html>
