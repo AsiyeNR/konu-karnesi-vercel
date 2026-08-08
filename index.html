@@ -140,6 +140,10 @@
   .fail-badge.y{background:var(--yanlis-bg);color:var(--yanlis);}
   .fail-badge.b{background:var(--bos-bg);color:var(--bos);}
 
+  .topic-edit-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .topic-edit-row input{flex:1;}
+  .icon-x{background:none;border:none;color:var(--yanlis);cursor:pointer;font-size:16px;padding:4px 8px;font-weight:700;}
+
   .legend{display:flex;gap:16px;font-size:12px;color:var(--ink-soft);margin-bottom:16px;flex-wrap:wrap;}
   .legend span{display:inline-flex;align-items:center;gap:5px;}
   .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
@@ -398,9 +402,10 @@
   <div class="view" id="view-konular">
     <div class="card">
       <h2><span class="eyebrow">Ayarlar</span>Ders ve konu yönetimi</h2>
-      <div id="konular-subjects"></div>
-      <div style="margin-top:16px;display:flex;gap:8px;">
-        <input type="text" id="yeni-subject-name" placeholder="Yeni ders adı (örn. Matematik)">
+      <p class="muted-note" style="margin-top:-6px;margin-bottom:14px;">İstediğin dersin konularını düzenleyebilir, silebilir veya yeni konu ekleyebilirsin.</p>
+      <div id="konular-container"></div>
+      <div style="margin-top:20px;display:flex;gap:8px;">
+        <input type="text" id="yeni-subject-name" placeholder="Yeni ders adı (örn. Türkçe)">
         <button class="btn btn-ghost" id="yeni-subject-btn">Ders ekle</button>
       </div>
     </div>
@@ -892,8 +897,111 @@ function renderGecmis(){
 }
 
 function renderKonular(){
-  document.getElementById('konular-subjects').innerHTML = DATA.subjects.map(subj=>`<h3>${subj.name}</h3>`).join('');
+  const container = document.getElementById('konular-container');
+  if(!container) return;
+  
+  container.innerHTML = DATA.subjects.map(subj => `
+    <div style="margin-bottom:20px; border-bottom:1px solid var(--grid); padding-bottom:14px;" data-subject-id="${subj.id}">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="font-size:15px; color:var(--accent);">${subj.name}</h3>
+        <button class="btn btn-danger btn-sm sil-subject-btn" data-id="${subj.id}">Dersi sil</button>
+      </div>
+      <div class="topics-list">
+        ${subj.topics.map((t, idx) => `
+          <div class="topic-edit-row" style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <input type="text" value="${t}" class="topic-input" data-index="${idx}" style="flex:1;">
+            <button class="icon-x delete-topic-btn" title="Konuyu sil" style="background:none;border:none;color:var(--yanlis);cursor:pointer;font-size:16px;padding:4px 8px;font-weight:700;">✕</button>
+          </div>
+        `).join('')}
+      </div>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <input type="text" placeholder="Yeni konu adı..." class="yeni-konu-input" style="flex:1;">
+        <button class="btn btn-ghost btn-sm add-topic-btn">Konu ekle</button>
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.topic-input').forEach(input => {
+    input.addEventListener('change', async (e) => {
+      const card = e.target.closest('[data-subject-id]');
+      const subjId = card.dataset.subjectId;
+      const idx = parseInt(e.target.dataset.index);
+      const val = e.target.value.trim();
+      const subj = getSubject(subjId);
+      if(val && subj){
+        subj.topics[idx] = val;
+        await saveData();
+        showToast('Konu güncellendi ✓');
+      }
+    });
+  });
+
+  container.querySelectorAll('.delete-topic-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const card = e.target.closest('[data-subject-id]');
+      const subjId = card.dataset.subjectId;
+      const row = e.target.closest('.topic-edit-row');
+      const idx = Array.from(card.querySelectorAll('.topic-edit-row')).indexOf(row);
+      const subj = getSubject(subjId);
+      if(subj && subj.topics.length > 1){
+        subj.topics.splice(idx, 1);
+        await saveData();
+        renderKonular();
+        showToast('Konu silindi');
+      } else {
+        alert('Derse ait en az bir konu kalmalıdır.');
+      }
+    });
+  });
+
+  container.querySelectorAll('.add-topic-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const card = e.target.closest('[data-subject-id]');
+      const subjId = card.dataset.subjectId;
+      const input = card.querySelector('.yeni-konu-input');
+      const val = input.value.trim();
+      const subj = getSubject(subjId);
+      if(val && subj){
+        subj.topics.push(val);
+        await saveData();
+        renderKonular();
+        showToast('Konu eklendi ✓');
+      }
+    });
+  });
+
+  container.querySelectorAll('.sil-subject-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const subjId = e.target.dataset.id;
+      if(DATA.subjects.length <= 1){
+        alert('Sistemde en az bir ders kalmalıdır.');
+        return;
+      }
+      if(confirm('Bu dersi ve altındaki tüm konuları silmek istediğine emin misin?')){
+        DATA.subjects = DATA.subjects.filter(s => s.id !== subjId);
+        await saveData();
+        renderKonular();
+        showToast('Ders silindi');
+      }
+    });
+  });
 }
+
+document.getElementById('yeni-subject-btn').addEventListener('click', async () => {
+  const input = document.getElementById('yeni-subject-name');
+  const name = input.value.trim();
+  if(!name) return;
+  const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if(DATA.subjects.some(s => s.id === id)){
+    alert('Bu ders zaten var.');
+    return;
+  }
+  DATA.subjects.push({ id, name, topics: ['Genel Konu'] });
+  input.value = '';
+  await saveData();
+  renderKonular();
+  showToast('Yeni ders eklendi ✓');
+});
 
 function setLoginError(msg){ document.getElementById('login-error').textContent = msg || ''; }
 function enterApp(){
