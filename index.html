@@ -77,19 +77,17 @@
   .card h2 .eyebrow{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
     color:var(--accent);font-weight:700;margin-bottom:4px;font-family:'JetBrains Mono';}
 
-  .empty{
-    text-align:center;padding:34px 16px;color:var(--ink-soft);
-  }
+  .empty{text-align:center;padding:34px 16px;color:var(--ink-soft);}
   .empty b{color:var(--ink);}
 
-  label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin:0 0 5px;}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
   input[type=text],input[type=date],input[type=number],select,textarea{
     width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:9px;
     font-family:'Inter';font-size:14px;background:#fff;color:var(--ink);
   }
   input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
   .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
-  .row > div{flex:1;min-width:140px;}
+  .row > div{flex:1;min-width:200px;}
 
   button.btn{
     font-family:'Inter';font-weight:600;font-size:13.5px;border:none;border-radius:9px;
@@ -192,22 +190,34 @@
   .login-switch a{color:var(--accent);font-weight:600;text-decoration:none;}
   .login-switch a:hover{text-decoration:underline;}
   .login-error{text-align:center;font-size:12.5px;color:var(--yanlis);margin-top:10px;min-height:1em;}
+  
   .input-icon{position:relative;margin-top:7px;}
   .input-icon .icon-left{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--ink-soft);pointer-events:none;z-index:2;}
+  
   .login-card input[type=email],
   .login-card input[type=password],
-  .login-card input[type=text]{
+  .login-card input[type=text],
+  #view-hesap input[type=email],
+  #view-hesap input[type=password]{
     width:100%;height:52px;padding:0 46px 0 46px;border-radius:13px;
     border:1.5px solid var(--line);background:var(--paper);
     font-family:'Inter';font-size:14.5px;color:var(--ink);
+    transition:border-color .15s, box-shadow .15s, background .15s;
   }
-  .login-card .btn-primary{height:52px;border-radius:13px;font-size:14.5px;letter-spacing:.01em;}
+  #view-hesap input[type=email]{padding-right:16px;}
+  #view-hesap input[type=email]:focus,
+  #view-hesap input[type=password]:focus{
+    background:#fff;border-color:var(--accent);
+    box-shadow:0 0 0 4px rgba(44,62,140,.13);outline:none;
+  }
+  
   .pw-toggle{
     position:absolute;right:10px;top:50%;transform:translateY(-50%);
     background:none;border:none;cursor:pointer;padding:8px;color:var(--ink-soft);
     display:flex;align-items:center;justify-content:center;border-radius:7px;z-index:2;
   }
   .pw-toggle:hover{color:var(--accent);background:var(--accent-soft);}
+  .pw-toggle.showing .eye-icon{color:var(--accent);}
 </style>
 </head>
 <body>
@@ -406,14 +416,23 @@
       <div class="row">
         <div>
           <label>E-posta adresi</label>
-          <input type="email" id="acc-email" placeholder="ornek@mail.com">
+          <div class="input-icon">
+            <svg class="icon-left" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/><path d="m3.5 6 8.5 7 8.5-7"/></svg>
+            <input type="email" id="acc-email" placeholder="ornek@mail.com">
+          </div>
         </div>
         <div>
           <label>Şifre</label>
-          <input type="password" id="acc-password" placeholder="en az 6 karakter" autocomplete="off">
+          <div class="input-icon">
+            <svg class="icon-left" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+            <input type="password" id="acc-password" placeholder="şifren" autocomplete="off">
+            <button type="button" class="pw-toggle" data-target="acc-password" aria-label="Şifreyi göster/gizle">
+              <svg class="eye-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
         <button class="btn btn-primary" id="acc-connect">Bağlan / Senkronize et</button>
         <button class="btn btn-ghost" id="acc-sync-now" style="display:none;">Şimdi senkronize et</button>
         <button class="btn btn-danger" id="acc-disconnect" style="display:none;">Çıkış Yap</button>
@@ -659,7 +678,6 @@ function renderOzet(){
     const totalY = exams.reduce((s,e)=>s+e.entries.reduce((a,x)=>a+x.y,0),0);
     const totalB = exams.reduce((s,e)=>s+e.entries.reduce((a,x)=>a+x.b,0),0);
 
-    // Yanlış veya boş yapılan konuları filtreleyip sıralayalım (En çok yanlıştan en aza)
     const fails = Object.entries(agg)
       .map(([topic, stats]) => ({ topic, y: stats.y, b: stats.b, totalBad: stats.y + stats.b }))
       .filter(item => item.totalBad > 0)
@@ -806,9 +824,16 @@ document.getElementById('foto-analyze').addEventListener('click', async ()=>{
   btn.innerHTML = '<span class="spin"></span>Tespit ediliyor...';
   try{
     const topicList = subj.topics.map((t,i)=>`${i+1}. ${t}`).join('\n');
-    const system = `Soru listesi eşleştirme asistanısın. Sadece JSON dizisi döndür: [{"no":1,"konu":"..."}] Konular: ${topicList}`;
+    const system = `Soru listesi eşleştirme asistanısın. Sadece saf bir JSON dizisi döndür, markdown veya başka açıklama ekleme: [{"no":1,"konu":"..."}] Konular: ${topicList}`;
     const data = await callGeminiAPI({ system, text: "Soruları eşleştir.", mime: fotoMime, base64: fotoBase64 });
-    let text = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
+    
+    let text = '';
+    if(data.candidates && data.candidates[0].content.parts[0].text){
+      text = data.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
+    } else {
+      throw new Error('Yapay zekadan geçersiz yanıt alındı.');
+    }
+
     fotoQMap = JSON.parse(text);
     fotoMarks = {};
     fotoQMap.forEach(p=>fotoMarks[p.no]='d');
