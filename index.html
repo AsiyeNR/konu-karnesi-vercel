@@ -129,19 +129,18 @@
 
   .exam-card{cursor:default;}
   .exam-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
-  .exam-meta{font-size:12px;color:var(--ink-soft);margin-top:3px;}
   .stat-strip{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
   .stat{background:var(--paper);border:1px solid var(--grid);border-radius:9px;padding:8px 12px;min-width:76px;text-align:center;}
   .stat b{display:block;font-family:'JetBrains Mono';font-size:16px;}
   .stat span{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
 
-  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .bar-label{width:150px;font-size:12.5px;font-weight:600;flex-shrink:0;text-align:right;}
-  .bar-track{flex:1;height:18px;background:var(--grid);border-radius:6px;overflow:hidden;display:flex;}
-  .bar-seg.d{background:var(--dogru);}
-  .bar-seg.y{background:var(--yanlis);}
-  .bar-seg.b{background:var(--bos);}
-  .bar-pct{width:44px;font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;color:var(--ink-soft);}
+  .analysis-box{margin-top:16px;background:var(--paper);border:1px solid var(--grid);border-radius:10px;padding:14px;}
+  .analysis-box h4{font-size:13px;margin-bottom:8px;color:var(--accent);font-family:'Space Grotesk';text-transform:uppercase;letter-spacing:.04em;}
+  .topic-fail-item{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--grid);}
+  .topic-fail-item:last-child{border-bottom:none;}
+  .fail-badge{font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:6px;}
+  .fail-badge.y{background:var(--yanlis-bg);color:var(--yanlis);}
+  .fail-badge.b{background:var(--bos-bg);color:var(--bos);}
 
   .legend{display:flex;gap:16px;font-size:12px;color:var(--ink-soft);margin-bottom:16px;flex-wrap:wrap;}
   .legend span{display:inline-flex;align-items:center;gap:5px;}
@@ -172,20 +171,13 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  .topic-edit-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
-  .topic-edit-row input{flex:1;}
-  .icon-x{background:none;border:none;color:var(--yanlis);cursor:pointer;font-size:16px;padding:4px 8px;font-weight:700;}
-
   .spin{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;
     animation:sp .7s linear infinite;display:inline-block;vertical-align:-3px;margin-right:7px;}
   @keyframes sp{to{transform:rotate(360deg);}}
 
   .muted-note{font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.5;}
-  .flex-between{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
 
-  .login-screen{
-    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
-  }
+  .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
   .login-card{
     width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);
     border-radius:20px;box-shadow:0 2px 6px rgba(30,42,74,.06), 0 16px 40px rgba(30,42,74,.10);
@@ -201,43 +193,21 @@
   .login-switch a:hover{text-decoration:underline;}
   .login-error{text-align:center;font-size:12.5px;color:var(--yanlis);margin-top:10px;min-height:1em;}
   .input-icon{position:relative;margin-top:7px;}
-  .input-icon .icon-left{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--ink-soft);pointer-events:none;transition:.15s;z-index:2;}
+  .input-icon .icon-left{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--ink-soft);pointer-events:none;z-index:2;}
   .login-card input[type=email],
   .login-card input[type=password],
   .login-card input[type=text]{
     width:100%;height:52px;padding:0 46px 0 46px;border-radius:13px;
     border:1.5px solid var(--line);background:var(--paper);
     font-family:'Inter';font-size:14.5px;color:var(--ink);
-    transition:border-color .15s, box-shadow .15s, background .15s;
   }
-  .login-card input[type=email]{padding-right:16px;}
-  .login-card input[type=email]:hover,
-  .login-card input[type=password]:hover{border-color:#a9b2c9;}
-  .login-card input[type=email]:focus,
-  .login-card input[type=password]:focus{
-    background:#fff;border-color:var(--accent);
-    box-shadow:0 0 0 4px rgba(44,62,140,.13);outline:none;
-  }
-  .login-card input:focus + .icon-left,
-  .input-icon:focus-within .icon-left{color:var(--accent);}
-  .login-card label{font-size:12.5px;margin-bottom:6px;}
   .login-card .btn-primary{height:52px;border-radius:13px;font-size:14.5px;letter-spacing:.01em;}
-  .login-card .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(44,62,140,.25);}
   .pw-toggle{
     position:absolute;right:10px;top:50%;transform:translateY(-50%);
     background:none;border:none;cursor:pointer;padding:8px;color:var(--ink-soft);
     display:flex;align-items:center;justify-content:center;border-radius:7px;z-index:2;
   }
   .pw-toggle:hover{color:var(--accent);background:var(--accent-soft);}
-  .pw-toggle.showing .eye-icon{color:var(--accent);}
-
-  @media (max-width:520px){
-    .ledger-row{grid-template-columns:1fr 56px 56px 56px 52px;gap:5px;padding:8px 8px;}
-    .pill-input{font-size:12px;padding:6px 2px;}
-    .bar-label{width:104px;font-size:11px;}
-    .topic-name{font-size:12.5px;}
-    .insight-grid{grid-template-columns:1fr !important;}
-  }
 </style>
 </head>
 <body>
@@ -250,12 +220,10 @@
         <span>Deneme sınavı konu takip sistemi</span>
       </div>
     </div>
-
     <div class="login-tabs">
       <button class="login-tab active" id="tab-login">Giriş Yap</button>
       <button class="login-tab" id="tab-register">Kayıt Ol</button>
     </div>
-
     <div id="login-form">
       <label>E-posta adresi</label>
       <div class="input-icon">
@@ -273,7 +241,6 @@
       <button class="btn btn-primary" id="login-submit" style="width:100%;margin-top:18px;">Giriş Yap</button>
       <p class="login-switch">Hesabın yok mu? <a href="#" id="go-register">Kayıt ol</a></p>
     </div>
-
     <div id="register-form" style="display:none;">
       <label>E-posta adresi</label>
       <div class="input-icon">
@@ -299,7 +266,6 @@
       <button class="btn btn-primary" id="register-submit" style="width:100%;margin-top:18px;">Kayıt Ol</button>
       <p class="login-switch">Zaten hesabın var mı? <a href="#" id="go-login">Giriş yap</a></p>
     </div>
-
     <p class="login-error" id="login-error"></p>
   </div>
 </div>
@@ -693,13 +659,33 @@ function renderOzet(){
     const totalY = exams.reduce((s,e)=>s+e.entries.reduce((a,x)=>a+x.y,0),0);
     const totalB = exams.reduce((s,e)=>s+e.entries.reduce((a,x)=>a+x.b,0),0);
 
+    // Yanlış veya boş yapılan konuları filtreleyip sıralayalım (En çok yanlıştan en aza)
+    const fails = Object.entries(agg)
+      .map(([topic, stats]) => ({ topic, y: stats.y, b: stats.b, totalBad: stats.y + stats.b }))
+      .filter(item => item.totalBad > 0)
+      .sort((a, b) => b.totalBad - a.totalBad);
+
     html += `<div class="card">
       <h2><span class="eyebrow">${exams.length} deneme</span>${subj.name}</h2>
-      <div class="stat-strip" style="margin-bottom:18px;">
+      <div class="stat-strip" style="margin-bottom:14px;">
         <div class="stat"><b style="color:var(--dogru)">${totalD}</b><span>Doğru</span></div>
         <div class="stat"><b style="color:var(--yanlis)">${totalY}</b><span>Yanlış</span></div>
         <div class="stat"><b style="color:var(--bos)">${totalB}</b><span>Boş</span></div>
         <div class="stat"><b style="color:var(--accent)">${net(totalD,totalY).toFixed(1)}</b><span>Toplam Net</span></div>
+      </div>
+      
+      <div class="analysis-box">
+        <h4>🎯 Öncelikli Çalışılması Gereken Konular (Eksik Analizi)</h4>
+        ${fails.length === 0 ? '<p class="muted-note" style="margin:0;">Tebrikler! Bu derste hiç yanlış veya boş konun bulunmuyor.</p>' :
+          fails.map(f => `
+            <div class="topic-fail-item">
+              <span style="font-weight:600;">${f.topic}</span>
+              <div>
+                ${f.y > 0 ? `<span class="fail-badge y">${f.y} Yanlış</span>` : ''}
+                ${f.b > 0 ? `<span class="fail-badge b" style="margin-left:4px;">${f.b} Boş</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
       </div>
     </div>`;
   });
@@ -801,7 +787,6 @@ function handleFotoFile(e){
   reader.readAsDataURL(file);
 }
 
-// Vercel üzerindeki güvenli sunucu fonksiyonuna istek atar
 async function callGeminiAPI({system, text, mime, base64}){
   const res = await fetch('/api/analyze', {
     method: 'POST',
@@ -870,9 +855,6 @@ function renderGecmis(){
   if(DATA.exams.length===0){ wrap.innerHTML = `<div class="card"><div class="empty"><b>Henüz deneme yok.</b></div></div>`; return; }
   wrap.innerHTML = [...DATA.exams].reverse().map(exam=>{
     const subj = getSubject(exam.subjectId);
-    const D = exam.entries.reduce((s,e)=>s+e.d,0);
-    const Y = exam.entries.reduce((s,e)=>s+e.y,0);
-    const B = exam.entries.reduce((s,e)=>s+e.b,0);
     return `<div class="card exam-card"><div class="exam-top"><span class="subject-chip">${subj?subj.name:'?'}</span> <b>${exam.name}</b> <button class="btn btn-danger btn-sm" data-del="${exam.id}">Sil</button></div></div>`;
   }).join('');
   wrap.querySelectorAll('[data-del]').forEach(btn=>{
